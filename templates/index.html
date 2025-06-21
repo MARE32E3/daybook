@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Daybook</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-start gap-8">
+      <!-- LEFT COLUMN: 25% -->
+      <div class="md:w-1/4 w-full">
+        <div id="today" class="text-gray-500 text-lg mb-2"></div>
+        <h1 class="text-4xl font-bold">Welcome to<br>Daybook</h1>
+        <div class="mt-4 text-gray-700">
+          <p>
+            <strong>Daybook</strong> is a simple site that recommends a new mind-expanding book every day, curated from a hand-picked list.
+            Each day, discover a new book and browse the archive of past recommendations.
+          </p>
+        </div>
+        <a href="/pastbooks" class="inline-block mt-4 text-blue-600 hover:underline text-lg font-medium">Past Books</a>
+        <div class="mt-6 w-full">
+          <div class="bg-white rounded-xl shadow p-4 text-sm text-gray-600">
+            <div class="mb-2">
+              <span class="font-semibold">Credits:</span>
+              <br>
+              Book list from <a href="https://github.com/hackerkid/Mind-Expanding-Books" target="_blank" class="text-blue-600 hover:underline">Mind-Expanding-Books</a>
+            </div>
+            <div>
+              Made with <span class="text-red-500">&lt;3</span> by
+              <a href="https://app.thelemmy.club/profile/thelemmy.club/u/Picasso" target="_blank" class="text-blue-600 hover:underline">Picasso</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- RIGHT COLUMN: 75% -->
+      <div id="book" class="md:w-3/4 w-full flex items-start justify-center"></div>
+    </div>
+  </div>
+  <script>
+    // Show today's date in user's locale
+    document.getElementById('today').textContent = new Date().toLocaleDateString(undefined, {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    fetch('/book')
+      .then(response => response.json())
+      .then(book => {
+        const cover = book.open_image || book.image_url || '';
+        document.getElementById('book').innerHTML = `
+          <div class="flex flex-col md:flex-row bg-white rounded-xl shadow-lg p-8 max-w-3xl w-full">
+            ${cover ? `
+              <div class="flex-shrink-0 mb-6 md:mb-0 md:mr-8 flex justify-center">
+                <img src="${cover}" alt="Book cover" class="w-40 rounded shadow">
+              </div>
+            ` : ''}
+            <div class="flex-1">
+              <h2 class="text-green-600 font-semibold text-md mb-2 flex items-center">
+                <span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                BOOK OF THE DAY
+              </h2>
+              <div class="text-2xl md:text-3xl font-bold mb-2">${book.title || ''}</div>
+              <div class="text-md mb-2">by <span class="italic">${book.author || ''}</span></div>
+              ${book.isbn ? `<div class="text-gray-500 text-sm mb-2">ISBN: ${book.isbn}</div>` : ''}
+              ${book.category ? `<span class="inline-block bg-red-200 text-red-800 text-xs px-3 py-1 rounded-full mb-4">${book.category}</span>` : ''}
+              ${book.description ? `<div class="text-gray-700 mb-4">${book.description}</div>` : ''}
+              ${book.bookwyrm_url ? `<a href="${book.bookwyrm_url}" target="_blank" class="inline-block bg-green-500 hover:bg-green-600 text-white font-semibold px-5 py-2 rounded transition">Open in BookWyrm</a>` : ''}
+            </div>
+          </div>
+        `;
+      });
+  </script>
+</body>
+</html>
