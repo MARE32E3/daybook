@@ -9,14 +9,18 @@
 <body class="bg-gray-100 min-h-screen p-6">
   <div class="max-w-6xl mx-auto">
     <div class="flex flex-col md:flex-row md:items-start gap-8">
-      <!-- LEFT COLUMN: 25% -->
+      <!-- LEFT COLUMN -->
       <div class="md:w-1/4 w-full">
-        <div id="today" class="text-gray-500 text-lg mb-2"></div>
         <h1 class="text-4xl font-bold">Welcome to<br>Daybook</h1>
         <div class="mt-4 text-gray-700">
           <p>
             <strong>Daybook</strong> is a simple site that recommends a new mind-expanding book every day, curated from a hand-picked list.
             Each day, discover a new book and browse the archive of past recommendations.
+          </p>
+          <div class="my-4"></div>
+          <p>
+            <strong>BookWyrm</strong> is a social network for tracking your reading, talking about books, writing reviews, and discovering what to read next.
+            <a href="https://joinbookwyrm.com/" target="_blank" class="text-blue-600 hover:underline">Learn more &rarr;</a>
           </p>
         </div>
         <a href="/pastbooks" class="inline-block mt-4 text-blue-600 hover:underline text-lg font-medium">Past Books</a>
@@ -34,8 +38,14 @@
           </div>
         </div>
       </div>
-      <!-- RIGHT COLUMN: 75% -->
-      <div id="book" class="md:w-3/4 w-full flex items-start justify-center"></div>
+      <!-- RIGHT COLUMN -->
+      <div class="md:w-3/4 w-full flex flex-col items-center">
+        <!-- Date above book card -->
+        <div id="today" class="text-gray-500 text-lg mb-2 w-full text-left"></div>
+        
+        <!-- Book card will be injected here -->
+        <div id="book" class="flex items-start justify-center w-full"></div>
+      </div>
     </div>
   </div>
   <script>
@@ -43,6 +53,44 @@
     document.getElementById('today').textContent = new Date().toLocaleDateString(undefined, {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
+
+    function truncateDescription(desc, maxSentences = 4) {
+      if (!desc) return '';
+      const sentences = desc.match(/[^\.!\?]+[\.!\?]+/g) || [desc];
+      if (sentences.length <= maxSentences) return desc;
+      return sentences.slice(0, maxSentences).join(' ').trim() + ' ...';
+    }
+
+    function getCategoryColor(category) {
+      const colors = {
+        "Philosophy And Psychology": "bg-yellow-200 text-yellow-800",
+        "Design": "bg-blue-200 text-blue-800",
+        "History": "bg-green-200 text-green-800",
+        "Startups and Business": "bg-purple-200 text-purple-800",
+        "Science and Medicine": "bg-teal-200 text-teal-800",
+        "Theater and Film": "bg-pink-200 text-pink-800",
+        "Classics": "bg-gray-200 text-gray-800",
+        "Economics": "bg-orange-200 text-orange-800",
+        "Science Fiction": "bg-indigo-200 text-indigo-800",
+        "Education": "bg-red-200 text-red-800",
+        "Autobiographies and Biographies": "bg-lime-200 text-lime-800",
+        "Health": "bg-emerald-200 text-emerald-800",
+        "Writing": "bg-fuchsia-200 text-fuchsia-800",
+        "Fantasy": "bg-cyan-200 text-cyan-800",
+        "Politics": "bg-rose-200 text-rose-800",
+        "Logic and Problem Solving": "bg-sky-200 text-sky-800",
+        "Miscellaneous": "bg-stone-200 text-stone-800",
+        "Language": "bg-violet-200 text-violet-800",
+        "Horror": "bg-red-300 text-red-900",
+        "Mystery": "bg-slate-200 text-slate-800",
+        "Travel": "bg-amber-200 text-amber-800",
+        "Shakespeare": "bg-green-300 text-green-900",
+        "Sexuality": "bg-pink-300 text-pink-900",
+        "Gender": "bg-indigo-300 text-indigo-900"
+        // Add more as needed
+      };
+      return colors[category] || "bg-red-200 text-red-800"; // fallback color
+    }
 
     fetch('/book')
       .then(response => response.json())
@@ -52,7 +100,7 @@
           <div class="flex flex-col md:flex-row bg-white rounded-xl shadow-lg p-8 max-w-3xl w-full">
             ${cover ? `
               <div class="flex-shrink-0 mb-6 md:mb-0 md:mr-8 flex justify-center">
-                <img src="${cover}" alt="Book cover" class="w-40 rounded shadow">
+                <img src="${cover}" alt="Book cover" class="w-40 max-h-64 object-contain rounded shadow">
               </div>
             ` : ''}
             <div class="flex-1">
@@ -63,8 +111,8 @@
               <div class="text-2xl md:text-3xl font-bold mb-2">${book.title || ''}</div>
               <div class="text-md mb-2">by <span class="italic">${book.author || ''}</span></div>
               ${book.isbn ? `<div class="text-gray-500 text-sm mb-2">ISBN: ${book.isbn}</div>` : ''}
-              ${book.category ? `<span class="inline-block bg-red-200 text-red-800 text-xs px-3 py-1 rounded-full mb-4">${book.category}</span>` : ''}
-              ${book.description ? `<div class="text-gray-700 mb-4">${book.description}</div>` : ''}
+              ${book.category ? `<span class="inline-block ${getCategoryColor(book.category)} text-xs px-3 py-1 rounded-full mb-4">${book.category}</span>` : ''}
+              ${book.description ? `<div class="text-gray-700 mb-4">${truncateDescription(book.description)}</div>` : ''}
               ${book.bookwyrm_url ? `<a href="${book.bookwyrm_url}" target="_blank" class="inline-block bg-green-500 hover:bg-green-600 text-white font-semibold px-5 py-2 rounded transition">Open in BookWyrm</a>` : ''}
             </div>
           </div>
